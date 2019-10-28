@@ -93,7 +93,6 @@ print(tvm.lower(s, [A, B, C], simple_mode=True))
 testit()
 
 def intrin_output_product(n,m):
-    n, m = 16, 16
     a = tvm.placeholder((n,), name='a')
     b = tvm.placeholder((m,), name='b')
     c = tvm.compute((n,m), lambda i,j: a[i] * b[j], name='c')
@@ -116,7 +115,7 @@ def intrin_output_product(n,m):
 
         def _body():
             ib = tvm.ir_builder.create()
-            ib.emit(tvm.call_extern("int32", "output_product_update",
+            ib.emit(tvm.call_extern("int32", "outer_product_update",
                                     cc.access_ptr("w"),
                                     aa.access_ptr("r"),
                                     bb.access_ptr("r"),
@@ -124,7 +123,7 @@ def intrin_output_product(n,m):
             return ib.get()
         def _reduce_reset():
             ib = tvm.ir_builder.create()
-            ib.emit(tvm.call_extern("int32", "output_product_reset",
+            ib.emit(tvm.call_extern("int32", "outer_product_reset",
                                     cc.access_ptr("w"),
                                     n, m, cc.strides[0]))
             return ib.get()
@@ -135,29 +134,22 @@ def intrin_output_product(n,m):
     with tvm.build_config(offset_factor=1):
         return tvm.decl_tensor_intrin(c.op, intrin_func, binds={a: Ab, b: Bb, c: Cb})
 
-outer_product = intrin_output_product( factor, factor)
-print(outer_product)
-
-s[C_buf].tensorize(yo, outer_product)
-#print(tvm.lower(s, [A, B, C], simple_mode=True))
-#testit()
-
-#exit()
+s[C_buf].tensorize(xi, intrin_output_product( factor, factor))
 
 def outer_product_impl():
     cc_code = """
-      extern "C" int outer_product_update(float *cc, float *aa, float *bb, int n, int m) {
+      extern "C" int outer_product_update(float *cc, float *aa, float *bb, int n, int m, int stride) {
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < m; ++j) {
-                cc[i * m + j] += aa[i] * bb[j];
+                cc[i * stride + j] += aa[i] * bb[j];
             }
         }
         return 0;
       }
-      extern "C" int outer_product_reset(float *cc, int n, int m) {
+      extern "C" int outer_product_reset(float *cc, int n, int m, int stride) {
         for (int i = 0; i < n; ++i) {
             for (int j = 0; j < m; ++j) {
-                cc[i * m + j] = 0;
+                cc[i * stride + j] = 0;
             }
         }
         return 0;
@@ -167,7 +159,9 @@ def outer_product_impl():
     temp = util.tempdir()
     return clang.create_llvm(cc_code, output=temp.relpath("temp.ll"))
 
-s[C_buf].pragma(z, "import_llvm", outer_product_impl())
+impl = outer_product_impl()
+print(impl)
+s[C_buf].pragma( k, "import_llvm", impl)
 print(tvm.lower(s, [A, B, C], simple_mode=True))
 
 testit()

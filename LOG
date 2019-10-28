@@ -212,31 +212,192 @@ produce C {
   }
 }
 
-TensorIntrin(name=tensor_intrin, 0x157a490)
-Traceback (most recent call last):
+; ModuleID = '/tmp/tmp3qqbukgc/input0.cc'
+source_filename = "/tmp/tmp3qqbukgc/input0.cc"
+target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-pc-linux-gnu"
 
-  File "tensorize_outer_product.py", line 171, in <module>
-    print(tvm.lower(s, [A, B, C], simple_mode=True))
+; Function Attrs: noinline nounwind optnone uwtable
+define i32 @outer_product_update(float*, float*, float*, i32, i32, i32) #0 {
+  %7 = alloca float*, align 8
+  %8 = alloca float*, align 8
+  %9 = alloca float*, align 8
+  %10 = alloca i32, align 4
+  %11 = alloca i32, align 4
+  %12 = alloca i32, align 4
+  %13 = alloca i32, align 4
+  %14 = alloca i32, align 4
+  store float* %0, float** %7, align 8
+  store float* %1, float** %8, align 8
+  store float* %2, float** %9, align 8
+  store i32 %3, i32* %10, align 4
+  store i32 %4, i32* %11, align 4
+  store i32 %5, i32* %12, align 4
+  store i32 0, i32* %13, align 4
+  br label %15
 
-  File "/home/smburns/UW/tvm/python/tvm/build_module.py", line 381, in lower
-    stmt = form_body(sch)
+; <label>:15:                                     ; preds = %50, %6
+  %16 = load i32, i32* %13, align 4
+  %17 = load i32, i32* %10, align 4
+  %18 = icmp slt i32 %16, %17
+  br i1 %18, label %19, label %53
 
-  File "/home/smburns/UW/tvm/python/tvm/build_module.py", line 332, in form_body
-    stmt = schedule.ScheduleOps(sch, bounds)
+; <label>:19:                                     ; preds = %15
+  store i32 0, i32* %14, align 4
+  br label %20
 
-  File "/home/smburns/UW/tvm/python/tvm/_ffi/_ctypes/function.py", line 207, in __call__
-    raise get_last_ffi_error()
+; <label>:20:                                     ; preds = %46, %19
+  %21 = load i32, i32* %14, align 4
+  %22 = load i32, i32* %11, align 4
+  %23 = icmp slt i32 %21, %22
+  br i1 %23, label %24, label %49
 
-tvm._ffi.base.TVMError: Traceback (most recent call last):
-  [bt] (8) /home/smburns/UW/tvm/build/libtvm.so(tvm::ir::IRMutator::Mutate_(tvm::ir::For const*, tvm::Stmt const&)+0xbc) [0x7f9ba3c8b8ec]
-  [bt] (7) /home/smburns/UW/tvm/build/libtvm.so(tvm::schedule::InjectAttach::Mutate(tvm::Stmt)+0x2b1) [0x7f9ba3e19721]
-  [bt] (6) /home/smburns/UW/tvm/build/libtvm.so(tvm::schedule::MakePipeline(tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, tvm::Stmt, bool)+0x5a) [0x7f9ba3e15e4a]
-  [bt] (5) /home/smburns/UW/tvm/build/libtvm.so(tvm::ComputeOpNode::BuildProvide(tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, bool) const+0x16d) [0x7f9ba3d8536d]
-  [bt] (4) /home/smburns/UW/tvm/build/libtvm.so(tvm::MakeTensorize(tvm::ComputeOpNode const*, tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, bool)+0x283) [0x7f9ba3dba2f3]
-  [bt] (3) /home/smburns/UW/tvm/build/libtvm.so(tvm::VerifyTensorizeBody(tvm::ComputeOpNode const*, tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::Tensor, tvm::Array<tvm::Range, void>, std::hash<tvm::Tensor>, std::equal_to<tvm::Tensor>, std::allocator<std::pair<tvm::Tensor const, tvm::Array<tvm::Range, void> > > > const&, tvm::TensorIntrin const&)+0x111) [0x7f9ba3db7451]
-  [bt] (2) /home/smburns/UW/tvm/build/libtvm.so(tvm::MatchTensorizeBody(tvm::ComputeOpNode const*, tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::Tensor, tvm::Array<tvm::Range, void>, std::hash<tvm::Tensor>, std::equal_to<tvm::Tensor>, std::allocator<std::pair<tvm::Tensor const, tvm::Array<tvm::Range, void> > > > const&, tvm::TensorIntrin const&, tvm::Map<tvm::Var, tvm::Range, void, void>*)+0x140) [0x7f9ba3db6e40]
-  [bt] (1) /home/smburns/UW/tvm/build/libtvm.so(tvm::TensorIntrinMatcher::Init(tvm::ComputeOpNode const*, tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::Tensor, tvm::Array<tvm::Range, void>, std::hash<tvm::Tensor>, std::equal_to<tvm::Tensor>, std::allocator<std::pair<tvm::Tensor const, tvm::Array<tvm::Range, void> > > > const&, tvm::TensorIntrin const&, tvm::Map<tvm::Var, tvm::Range, void, void>*)+0x865) [0x7f9ba3dc1d25]
-  [bt] (0) /home/smburns/UW/tvm/build/libtvm.so(dmlc::LogMessageFatal::~LogMessageFatal()+0x43) [0x7f9ba3a37d53]
-  File "/home/smburns/UW/tvm/src/op/tensorize.cc", line 237
-TVMError: Check failed: is_one(canonical_extent): Tensorize tensor_intrin: Input dimension mismatch with tensor intrin  expected shape=[16], given region=[range(min=0, ext=64), range(min=(i0.outer*16), ext=16)]
+; <label>:24:                                     ; preds = %20
+  %25 = load float*, float** %8, align 8
+  %26 = load i32, i32* %13, align 4
+  %27 = sext i32 %26 to i64
+  %28 = getelementptr inbounds float, float* %25, i64 %27
+  %29 = load float, float* %28, align 4
+  %30 = load float*, float** %9, align 8
+  %31 = load i32, i32* %14, align 4
+  %32 = sext i32 %31 to i64
+  %33 = getelementptr inbounds float, float* %30, i64 %32
+  %34 = load float, float* %33, align 4
+  %35 = fmul float %29, %34
+  %36 = load float*, float** %7, align 8
+  %37 = load i32, i32* %13, align 4
+  %38 = load i32, i32* %12, align 4
+  %39 = mul nsw i32 %37, %38
+  %40 = load i32, i32* %14, align 4
+  %41 = add nsw i32 %39, %40
+  %42 = sext i32 %41 to i64
+  %43 = getelementptr inbounds float, float* %36, i64 %42
+  %44 = load float, float* %43, align 4
+  %45 = fadd float %44, %35
+  store float %45, float* %43, align 4
+  br label %46
+
+; <label>:46:                                     ; preds = %24
+  %47 = load i32, i32* %14, align 4
+  %48 = add nsw i32 %47, 1
+  store i32 %48, i32* %14, align 4
+  br label %20
+
+; <label>:49:                                     ; preds = %20
+  br label %50
+
+; <label>:50:                                     ; preds = %49
+  %51 = load i32, i32* %13, align 4
+  %52 = add nsw i32 %51, 1
+  store i32 %52, i32* %13, align 4
+  br label %15
+
+; <label>:53:                                     ; preds = %15
+  ret i32 0
+}
+
+; Function Attrs: noinline nounwind optnone uwtable
+define i32 @outer_product_reset(float*, i32, i32, i32) #0 {
+  %5 = alloca float*, align 8
+  %6 = alloca i32, align 4
+  %7 = alloca i32, align 4
+  %8 = alloca i32, align 4
+  %9 = alloca i32, align 4
+  %10 = alloca i32, align 4
+  store float* %0, float** %5, align 8
+  store i32 %1, i32* %6, align 4
+  store i32 %2, i32* %7, align 4
+  store i32 %3, i32* %8, align 4
+  store i32 0, i32* %9, align 4
+  br label %11
+
+; <label>:11:                                     ; preds = %33, %4
+  %12 = load i32, i32* %9, align 4
+  %13 = load i32, i32* %6, align 4
+  %14 = icmp slt i32 %12, %13
+  br i1 %14, label %15, label %36
+
+; <label>:15:                                     ; preds = %11
+  store i32 0, i32* %10, align 4
+  br label %16
+
+; <label>:16:                                     ; preds = %29, %15
+  %17 = load i32, i32* %10, align 4
+  %18 = load i32, i32* %7, align 4
+  %19 = icmp slt i32 %17, %18
+  br i1 %19, label %20, label %32
+
+; <label>:20:                                     ; preds = %16
+  %21 = load float*, float** %5, align 8
+  %22 = load i32, i32* %9, align 4
+  %23 = load i32, i32* %8, align 4
+  %24 = mul nsw i32 %22, %23
+  %25 = load i32, i32* %10, align 4
+  %26 = add nsw i32 %24, %25
+  %27 = sext i32 %26 to i64
+  %28 = getelementptr inbounds float, float* %21, i64 %27
+  store float 0.000000e+00, float* %28, align 4
+  br label %29
+
+; <label>:29:                                     ; preds = %20
+  %30 = load i32, i32* %10, align 4
+  %31 = add nsw i32 %30, 1
+  store i32 %31, i32* %10, align 4
+  br label %16
+
+; <label>:32:                                     ; preds = %16
+  br label %33
+
+; <label>:33:                                     ; preds = %32
+  %34 = load i32, i32* %9, align 4
+  %35 = add nsw i32 %34, 1
+  store i32 %35, i32* %9, align 4
+  br label %11
+
+; <label>:36:                                     ; preds = %11
+  ret i32 0
+}
+
+attributes #0 = { noinline nounwind optnone uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "less-precise-fpmad"="false" "no-frame-pointer-elim"="true" "no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+
+!llvm.module.flags = !{!0}
+!llvm.ident = !{!1}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{!"clang version 6.0.0-1ubuntu2 (tags/RELEASE_600/final)"}
+
+// attr [C_buf] storage_scope = "global"
+allocate C_buf[float32 * 256]
+// attr [A_buf] storage_scope = "global"
+allocate A_buf[float32 * 16]
+// attr [B_buf] storage_scope = "global"
+allocate B_buf[float32 * 16]
+produce C {
+  for (i0.outer, 0, 64) {
+    for (i1.outer, 0, 32) {
+      produce C_buf {
+        outer_product_reset(tvm_access_ptr(type_annotation(), C_buf, 0, 256, 2), 16, 16, 16)
+        // attr [iter_var(k, )] pragma_import_llvm = "; ModuleID = '/tmp/tmp3qqbukgc/input0.cc'\nsource_filename = \"/tmp/tmp3qqbukgc/input0.cc\"\ntarget datalayout = \"e-m:e-i64:64-f80:128-n8:16:32:64-S128\"\ntarget triple = \"x86_64-pc-linux-gnu\"\n\n; Function Attrs: noinline nounwind optnone uwtable\ndefine i32 @outer_product_update(float*, float*, float*, i32, i32, i32) #0 {\n  %7 = alloca float*, align 8\n  %8 = alloca float*, align 8\n  %9 = alloca float*, align 8\n  %10 = alloca i32, align 4\n  %11 = alloca i32, align 4\n  %12 = alloca i32, align 4\n  %13 = alloca i32, align 4\n  %14 = alloca i32, align 4\n  store float* %0, float** %7, align 8\n  store float* %1, float** %8, align 8\n  store float* %2, float** %9, align 8\n  store i32 %3, i32* %10, align 4\n  store i32 %4, i32* %11, align 4\n  store i32 %5, i32* %12, align 4\n  store i32 0, i32* %13, align 4\n  br label %15\n\n; <label>:15:                                     ; preds = %50, %6\n  %16 = load i32, i32* %13, align 4\n  %17 = load i32, i32* %10, align 4\n  %18 = icmp slt i32 %16, %17\n  br i1 %18, label %19, label %53\n\n; <label>:19:                                     ; preds = %15\n  store i32 0, i32* %14, align 4\n  br label %20\n\n; <label>:20:                                     ; preds = %46, %19\n  %21 = load i32, i32* %14, align 4\n  %22 = load i32, i32* %11, align 4\n  %23 = icmp slt i32 %21, %22\n  br i1 %23, label %24, label %49\n\n; <label>:24:                                     ; preds = %20\n  %25 = load float*, float** %8, align 8\n  %26 = load i32, i32* %13, align 4\n  %27 = sext i32 %26 to i64\n  %28 = getelementptr inbounds float, float* %25, i64 %27\n  %29 = load float, float* %28, align 4\n  %30 = load float*, float** %9, align 8\n  %31 = load i32, i32* %14, align 4\n  %32 = sext i32 %31 to i64\n  %33 = getelementptr inbounds float, float* %30, i64 %32\n  %34 = load float, float* %33, align 4\n  %35 = fmul float %29, %34\n  %36 = load float*, float** %7, align 8\n  %37 = load i32, i32* %13, align 4\n  %38 = load i32, i32* %12, align 4\n  %39 = mul nsw i32 %37, %38\n  %40 = load i32, i32* %14, align 4\n  %41 = add nsw i32 %39, %40\n  %42 = sext i32 %41 to i64\n  %43 = getelementptr inbounds float, float* %36, i64 %42\n  %44 = load float, float* %43, align 4\n  %45 = fadd float %44, %35\n  store float %45, float* %43, align 4\n  br label %46\n\n; <label>:46:                                     ; preds = %24\n  %47 = load i32, i32* %14, align 4\n  %48 = add nsw i32 %47, 1\n  store i32 %48, i32* %14, align 4\n  br label %20\n\n; <label>:49:                                     ; preds = %20\n  br label %50\n\n; <label>:50:                                     ; preds = %49\n  %51 = load i32, i32* %13, align 4\n  %52 = add nsw i32 %51, 1\n  store i32 %52, i32* %13, align 4\n  br label %15\n\n; <label>:53:                                     ; preds = %15\n  ret i32 0\n}\n\n; Function Attrs: noinline nounwind optnone uwtable\ndefine i32 @outer_product_reset(float*, i32, i32, i32) #0 {\n  %5 = alloca float*, align 8\n  %6 = alloca i32, align 4\n  %7 = alloca i32, align 4\n  %8 = alloca i32, align 4\n  %9 = alloca i32, align 4\n  %10 = alloca i32, align 4\n  store float* %0, float** %5, align 8\n  store i32 %1, i32* %6, align 4\n  store i32 %2, i32* %7, align 4\n  store i32 %3, i32* %8, align 4\n  store i32 0, i32* %9, align 4\n  br label %11\n\n; <label>:11:                                     ; preds = %33, %4\n  %12 = load i32, i32* %9, align 4\n  %13 = load i32, i32* %6, align 4\n  %14 = icmp slt i32 %12, %13\n  br i1 %14, label %15, label %36\n\n; <label>:15:                                     ; preds = %11\n  store i32 0, i32* %10, align 4\n  br label %16\n\n; <label>:16:                                     ; preds = %29, %15\n  %17 = load i32, i32* %10, align 4\n  %18 = load i32, i32* %7, align 4\n  %19 = icmp slt i32 %17, %18\n  br i1 %19, label %20, label %32\n\n; <label>:20:                                     ; preds = %16\n  %21 = load float*, float** %5, align 8\n  %22 = load i32, i32* %9, align 4\n  %23 = load i32, i32* %8, align 4\n  %24 = mul nsw i32 %22, %23\n  %25 = load i32, i32* %10, align 4\n  %26 = add nsw i32 %24, %25\n  %27 = sext i32 %26 to i64\n  %28 = getelementptr inbounds float, float* %21, i64 %27\n  store float 0.000000e+00, float* %28, align 4\n  br label %29\n\n; <label>:29:                                     ; preds = %20\n  %30 = load i32, i32* %10, align 4\n  %31 = add nsw i32 %30, 1\n  store i32 %31, i32* %10, align 4\n  br label %16\n\n; <label>:32:                                     ; preds = %16\n  br label %33\n\n; <label>:33:                                     ; preds = %32\n  %34 = load i32, i32* %9, align 4\n  %35 = add nsw i32 %34, 1\n  store i32 %35, i32* %9, align 4\n  br label %11\n\n; <label>:36:                                     ; preds = %11\n  ret i32 0\n}\n\nattributes #0 = { noinline nounwind optnone uwtable \"correctly-rounded-divide-sqrt-fp-math\"=\"false\" \"disable-tail-calls\"=\"false\" \"less-precise-fpmad\"=\"false\" \"no-frame-pointer-elim\"=\"true\" \"no-frame-pointer-elim-non-leaf\" \"no-infs-fp-math\"=\"false\" \"no-jump-tables\"=\"false\" \"no-nans-fp-math\"=\"false\" \"no-signed-zeros-fp-math\"=\"false\" \"no-trapping-math\"=\"false\" \"stack-protector-buffer-size\"=\"8\" \"target-cpu\"=\"x86-64\" \"target-features\"=\"+fxsr,+mmx,+sse,+sse2,+x87\" \"unsafe-fp-math\"=\"false\" \"use-soft-float\"=\"false\" }\n\n!llvm.module.flags = !{!0}\n!llvm.ident = !{!1}\n\n!0 = !{i32 1, !\"wchar_size\", i32 4}\n!1 = !{!\"clang version 6.0.0-1ubuntu2 (tags/RELEASE_600/final)\"}\n"
+        for (k, 0, 64) {
+          produce A_buf {
+            for (i1, 0, 16) {
+              A_buf[i1] = A[(((k*1024) + (i0.outer*16)) + i1)]
+            }
+          }
+          produce B_buf {
+            for (i1, 0, 16) {
+              B_buf[i1] = B[(((k*512) + (i1.outer*16)) + i1)]
+            }
+          }
+          outer_product_update(tvm_access_ptr(type_annotation(), C_buf, 0, 256, 2), tvm_access_ptr(type_annotation(), A_buf, 0, 16, 1), tvm_access_ptr(type_annotation(), B_buf, 0, 16, 1), 16, 16, 16)
+        }
+      }
+      for (i0.inner, 0, 16) {
+        for (i1.inner, 0, 16) {
+          C[((((i0.outer*8192) + (i0.inner*512)) + (i1.outer*16)) + i1.inner)] = C_buf[((i0.inner*16) + i1.inner)]
+        }
+      }
+    }
+  }
+}
 
