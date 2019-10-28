@@ -1,0 +1,242 @@
+// attr [A_buf] storage_scope = "global"
+allocate A_buf[float32 * 65536]
+// attr [B_buf] storage_scope = "global"
+allocate B_buf[float32 * 32768]
+// attr [C_buf] storage_scope = "global"
+allocate C_buf[float32 * 524288]
+produce A_buf {
+  for (i0, 0, 64) {
+    for (i1, 0, 1024) {
+      A_buf[((i0*1024) + i1)] = A[((i0*1024) + i1)]
+    }
+  }
+}
+produce B_buf {
+  for (i0, 0, 64) {
+    for (i1, 0, 512) {
+      B_buf[((i0*512) + i1)] = B[((i0*512) + i1)]
+    }
+  }
+}
+produce C_buf {
+  for (i, 0, 1024) {
+    for (j, 0, 512) {
+      C_buf[((i*512) + j)] = 0f
+      for (k, 0, 64) {
+        C_buf[((i*512) + j)] = (C_buf[((i*512) + j)] + (A_buf[((k*1024) + i)]*B_buf[((k*512) + j)]))
+      }
+    }
+  }
+}
+produce C {
+  for (i0, 0, 1024) {
+    for (i1, 0, 512) {
+      C[((i0*512) + i1)] = C_buf[((i0*512) + i1)]
+    }
+  }
+}
+
+// attr [A_buf] storage_scope = "global"
+allocate A_buf[float32 * 65536]
+// attr [B_buf] storage_scope = "global"
+allocate B_buf[float32 * 32768]
+// attr [C_buf] storage_scope = "global"
+allocate C_buf[float32 * 524288]
+produce A_buf {
+  for (i0, 0, 64) {
+    for (i1, 0, 1024) {
+      A_buf[((i0*1024) + i1)] = A[((i0*1024) + i1)]
+    }
+  }
+}
+produce B_buf {
+  for (i0, 0, 64) {
+    for (i1, 0, 512) {
+      B_buf[((i0*512) + i1)] = B[((i0*512) + i1)]
+    }
+  }
+}
+produce C_buf {
+  for (i.outer, 0, 64) {
+    for (j.outer, 0, 32) {
+      for (i.inner.init, 0, 16) {
+        for (j.inner.init, 0, 16) {
+          C_buf[((((i.outer*8192) + (i.inner.init*512)) + (j.outer*16)) + j.inner.init)] = 0f
+        }
+      }
+      for (k, 0, 64) {
+        for (i.inner, 0, 16) {
+          for (j.inner, 0, 16) {
+            C_buf[((((i.outer*8192) + (i.inner*512)) + (j.outer*16)) + j.inner)] = (C_buf[((((i.outer*8192) + (i.inner*512)) + (j.outer*16)) + j.inner)] + (A_buf[(((k*1024) + (i.outer*16)) + i.inner)]*B_buf[(((k*512) + (j.outer*16)) + j.inner)]))
+          }
+        }
+      }
+    }
+  }
+}
+produce C {
+  for (i0, 0, 1024) {
+    for (i1, 0, 512) {
+      C[((i0*512) + i1)] = C_buf[((i0*512) + i1)]
+    }
+  }
+}
+
+// attr [C_buf] storage_scope = "global"
+allocate C_buf[float32 * 524288]
+// attr [A_buf] storage_scope = "global"
+allocate A_buf[float32 * 16]
+// attr [B_buf] storage_scope = "global"
+allocate B_buf[float32 * 16]
+produce C_buf {
+  for (i.outer, 0, 64) {
+    for (j.outer, 0, 32) {
+      for (i.inner.init, 0, 16) {
+        for (j.inner.init, 0, 16) {
+          C_buf[((((i.outer*8192) + (i.inner.init*512)) + (j.outer*16)) + j.inner.init)] = 0f
+        }
+      }
+      for (k, 0, 64) {
+        produce A_buf {
+          for (i1, 0, 16) {
+            A_buf[i1] = A[(((k*1024) + (i.outer*16)) + i1)]
+          }
+        }
+        produce B_buf {
+          for (i1, 0, 16) {
+            B_buf[i1] = B[(((k*512) + (j.outer*16)) + i1)]
+          }
+        }
+        for (i.inner, 0, 16) {
+          for (j.inner, 0, 16) {
+            C_buf[((((i.outer*8192) + (i.inner*512)) + (j.outer*16)) + j.inner)] = (C_buf[((((i.outer*8192) + (i.inner*512)) + (j.outer*16)) + j.inner)] + (A_buf[i.inner]*B_buf[j.inner]))
+          }
+        }
+      }
+    }
+  }
+}
+produce C {
+  for (i0, 0, 1024) {
+    for (i1, 0, 512) {
+      C[((i0*512) + i1)] = C_buf[((i0*512) + i1)]
+    }
+  }
+}
+
+// attr [C_buf] storage_scope = "global"
+allocate C_buf[float32 * 524288]
+// attr [A_buf] storage_scope = "global"
+allocate A_buf[float32 * 16]
+// attr [B_buf] storage_scope = "global"
+allocate B_buf[float32 * 16]
+produce C_buf {
+  for (i.outer, 0, 64) {
+    for (j.outer, 0, 32) {
+      for (i.inner.init, 0, 16) {
+        for (j.inner.init, 0, 16) {
+          C_buf[((((i.outer*8192) + (i.inner.init*512)) + (j.outer*16)) + j.inner.init)] = 0f
+        }
+      }
+      for (k, 0, 64) {
+        produce A_buf {
+          for (i1, 0, 16) {
+            A_buf[i1] = A[(((k*1024) + (i.outer*16)) + i1)]
+          }
+        }
+        produce B_buf {
+          for (i1, 0, 16) {
+            B_buf[i1] = B[(((k*512) + (j.outer*16)) + i1)]
+          }
+        }
+        for (i.inner, 0, 16) {
+          for (j.inner, 0, 16) {
+            C_buf[((((i.outer*8192) + (i.inner*512)) + (j.outer*16)) + j.inner)] = (C_buf[((((i.outer*8192) + (i.inner*512)) + (j.outer*16)) + j.inner)] + (A_buf[i.inner]*B_buf[j.inner]))
+          }
+        }
+      }
+    }
+  }
+}
+produce C {
+  for (i0.outer, 0, 64) {
+    for (i1.outer, 0, 32) {
+      for (i0.inner, 0, 16) {
+        for (i1.inner, 0, 16) {
+          C[((((i0.outer*8192) + (i0.inner*512)) + (i1.outer*16)) + i1.inner)] = C_buf[((((i0.outer*8192) + (i0.inner*512)) + (i1.outer*16)) + i1.inner)]
+        }
+      }
+    }
+  }
+}
+
+// attr [C_buf] storage_scope = "global"
+allocate C_buf[float32 * 256]
+// attr [A_buf] storage_scope = "global"
+allocate A_buf[float32 * 16]
+// attr [B_buf] storage_scope = "global"
+allocate B_buf[float32 * 16]
+produce C {
+  for (i0.outer, 0, 64) {
+    for (i1.outer, 0, 32) {
+      produce C_buf {
+        for (i.inner.init, 0, 16) {
+          for (j.inner.init, 0, 16) {
+            C_buf[((i.inner.init*16) + j.inner.init)] = 0f
+          }
+        }
+        for (k, 0, 64) {
+          produce A_buf {
+            for (i1, 0, 16) {
+              A_buf[i1] = A[(((k*1024) + (i0.outer*16)) + i1)]
+            }
+          }
+          produce B_buf {
+            for (i1, 0, 16) {
+              B_buf[i1] = B[(((k*512) + (i1.outer*16)) + i1)]
+            }
+          }
+          for (i.inner, 0, 16) {
+            for (j.inner, 0, 16) {
+              C_buf[((i.inner*16) + j.inner)] = (C_buf[((i.inner*16) + j.inner)] + (A_buf[i.inner]*B_buf[j.inner]))
+            }
+          }
+        }
+      }
+      for (i0.inner, 0, 16) {
+        for (i1.inner, 0, 16) {
+          C[((((i0.outer*8192) + (i0.inner*512)) + (i1.outer*16)) + i1.inner)] = C_buf[((i0.inner*16) + i1.inner)]
+        }
+      }
+    }
+  }
+}
+
+TensorIntrin(name=tensor_intrin, 0x157a490)
+Traceback (most recent call last):
+
+  File "tensorize_outer_product.py", line 171, in <module>
+    print(tvm.lower(s, [A, B, C], simple_mode=True))
+
+  File "/home/smburns/UW/tvm/python/tvm/build_module.py", line 381, in lower
+    stmt = form_body(sch)
+
+  File "/home/smburns/UW/tvm/python/tvm/build_module.py", line 332, in form_body
+    stmt = schedule.ScheduleOps(sch, bounds)
+
+  File "/home/smburns/UW/tvm/python/tvm/_ffi/_ctypes/function.py", line 207, in __call__
+    raise get_last_ffi_error()
+
+tvm._ffi.base.TVMError: Traceback (most recent call last):
+  [bt] (8) /home/smburns/UW/tvm/build/libtvm.so(tvm::ir::IRMutator::Mutate_(tvm::ir::For const*, tvm::Stmt const&)+0xbc) [0x7f9ba3c8b8ec]
+  [bt] (7) /home/smburns/UW/tvm/build/libtvm.so(tvm::schedule::InjectAttach::Mutate(tvm::Stmt)+0x2b1) [0x7f9ba3e19721]
+  [bt] (6) /home/smburns/UW/tvm/build/libtvm.so(tvm::schedule::MakePipeline(tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, tvm::Stmt, bool)+0x5a) [0x7f9ba3e15e4a]
+  [bt] (5) /home/smburns/UW/tvm/build/libtvm.so(tvm::ComputeOpNode::BuildProvide(tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, bool) const+0x16d) [0x7f9ba3d8536d]
+  [bt] (4) /home/smburns/UW/tvm/build/libtvm.so(tvm::MakeTensorize(tvm::ComputeOpNode const*, tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, bool)+0x283) [0x7f9ba3dba2f3]
+  [bt] (3) /home/smburns/UW/tvm/build/libtvm.so(tvm::VerifyTensorizeBody(tvm::ComputeOpNode const*, tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::Tensor, tvm::Array<tvm::Range, void>, std::hash<tvm::Tensor>, std::equal_to<tvm::Tensor>, std::allocator<std::pair<tvm::Tensor const, tvm::Array<tvm::Range, void> > > > const&, tvm::TensorIntrin const&)+0x111) [0x7f9ba3db7451]
+  [bt] (2) /home/smburns/UW/tvm/build/libtvm.so(tvm::MatchTensorizeBody(tvm::ComputeOpNode const*, tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::Tensor, tvm::Array<tvm::Range, void>, std::hash<tvm::Tensor>, std::equal_to<tvm::Tensor>, std::allocator<std::pair<tvm::Tensor const, tvm::Array<tvm::Range, void> > > > const&, tvm::TensorIntrin const&, tvm::Map<tvm::Var, tvm::Range, void, void>*)+0x140) [0x7f9ba3db6e40]
+  [bt] (1) /home/smburns/UW/tvm/build/libtvm.so(tvm::TensorIntrinMatcher::Init(tvm::ComputeOpNode const*, tvm::Stage const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::IterVar, tvm::Range, std::hash<tvm::IterVar>, std::equal_to<tvm::IterVar>, std::allocator<std::pair<tvm::IterVar const, tvm::Range> > > const&, std::unordered_map<tvm::Tensor, tvm::Array<tvm::Range, void>, std::hash<tvm::Tensor>, std::equal_to<tvm::Tensor>, std::allocator<std::pair<tvm::Tensor const, tvm::Array<tvm::Range, void> > > > const&, tvm::TensorIntrin const&, tvm::Map<tvm::Var, tvm::Range, void, void>*)+0x865) [0x7f9ba3dc1d25]
+  [bt] (0) /home/smburns/UW/tvm/build/libtvm.so(dmlc::LogMessageFatal::~LogMessageFatal()+0x43) [0x7f9ba3a37d53]
+  File "/home/smburns/UW/tvm/src/op/tensorize.cc", line 237
+TVMError: Check failed: is_one(canonical_extent): Tensorize tensor_intrin: Input dimension mismatch with tensor intrin  expected shape=[16], given region=[range(min=0, ext=64), range(min=(i0.outer*16), ext=16)]
+
