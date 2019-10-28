@@ -18,32 +18,35 @@ def testit():
     func(tvm.nd.array(a, ctx), tvm.nd.array(b, ctx), c)
     tvm.testing.assert_allclose(c.asnumpy(), np.dot(a.T, b), rtol=1e-3)
 
-#
-# The following lines describe the computation :code:`A^T * B` in TVM.
-#
 N, M, L = 1024, 512, 64
-# first argument is a 2D shape
-A = tvm.placeholder((L, N), name='A')
-B = tvm.placeholder((L, M), name='B')
-# first argument is a 1D range
-k = tvm.reduce_axis((0, L), name='k')
-C = tvm.compute((N, M), lambda i, j:
-                tvm.sum(A[k, i] * B[k, j], axis=k), name='C')
-s = tvm.create_schedule(C.op)
-print(tvm.lower(s, [A, B, C], simple_mode=True))
-testit()
 
-#
-# Make it outer_product by moving z above xi,yi
-#
-factor = 16
-x, y = C.op.axis
-z, = C.op.reduce_axis
-xo, xi = s[C].split(x, factor=factor)
-yo, yi = s[C].split(y, factor=factor)
-s[C].reorder(xo, yo, z, xi, yi)
-print(tvm.lower(s, [A, B, C], simple_mode=True))
-testit()
+if False:
+    #
+    # The following lines describe the computation :code:`A^T * B` in TVM.
+    #
+
+    # first argument is a 2D shape
+    A = tvm.placeholder((L, N), name='A')
+    B = tvm.placeholder((L, M), name='B')
+    # first argument is a 1D range
+    k = tvm.reduce_axis((0, L), name='k')
+    C = tvm.compute((N, M), lambda i, j:
+                    tvm.sum(A[k, i] * B[k, j], axis=k), name='C')
+    s = tvm.create_schedule(C.op)
+    print(tvm.lower(s, [A, B, C], simple_mode=True))
+    testit()
+
+    #
+    # Make it outer_product by moving z above xi,yi
+    #
+    factor = 16
+    x, y = C.op.axis
+    z, = C.op.reduce_axis
+    xo, xi = s[C].split(x, factor=factor)
+    yo, yi = s[C].split(y, factor=factor)
+    s[C].reorder(xo, yo, z, xi, yi)
+    print(tvm.lower(s, [A, B, C], simple_mode=True))
+    testit()
 
 # first argument is a 2D shape
 A = tvm.placeholder((L, N), name='A')
@@ -89,32 +92,8 @@ s[C_buf].compute_at(s[C], c_yo)
 print(tvm.lower(s, [A, B, C], simple_mode=True))
 testit()
 
-exit()
-
-def outer_product_impl():
-    cc_code = """
-      extern "C" int outer_product_update(float *cc, float *aa, float *bb, int n, int m) {
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < m; ++j) {
-                cc[i * m + j] += aa[i] * bb[j];
-            }
-        }
-        return 0;
-      }
-      extern "C" int outer_product_reset(float *cc, int n, int m) {
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < m; ++j) {
-                cc[i * m + j] = 0;
-            }
-        }
-        return 0;
-      }
-    """
-    from tvm.contrib import util, clang
-    temp = util.tempdir()
-    return clang.create_llvm(cc_code, output=temp.relpath("temp.ll"))
-
-def intrin_output_product(n, m):
+def intrin_output_product(n,m):
+    n, m = 16, 16
     a = tvm.placeholder((n,), name='a')
     b = tvm.placeholder((m,), name='b')
     c = tvm.compute((n,m), lambda i,j: a[i] * b[j], name='c')
@@ -141,13 +120,13 @@ def intrin_output_product(n, m):
                                     cc.access_ptr("w"),
                                     aa.access_ptr("r"),
                                     bb.access_ptr("r"),
-                                    n, m))
+                                    n, m, cc.strides[0]))
             return ib.get()
         def _reduce_reset():
             ib = tvm.ir_builder.create()
             ib.emit(tvm.call_extern("int32", "output_product_reset",
                                     cc.access_ptr("w"),
-                                    n, m))
+                                    n, m, cc.strides[0]))
             return ib.get()
         def _reduce_update():
             return _body()
@@ -156,13 +135,39 @@ def intrin_output_product(n, m):
     with tvm.build_config(offset_factor=1):
         return tvm.decl_tensor_intrin(c.op, intrin_func, binds={a: Ab, b: Bb, c: Cb})
 
-outer_product = intrin_output_product(factor, factor)
-s[C].tensorize(yi, outer_product)
-s[C].pragma(yo, "import_llvm", outer_product_impl())
+outer_product = intrin_output_product( factor, factor)
+print(outer_product)
 
-func = tvm.build(s, [A, B, C], target="llvm", name="outer_product")
-a = np.random.uniform(size=get_const_tuple(A.shape)).astype(dtype)
-b = np.random.uniform(size=get_const_tuple(B.shape)).astype(dtype)
-c = tvm.nd.array(np.zeros(get_const_tuple(C.shape), dtype=dtype), ctx)
-func(tvm.nd.array(a, ctx), tvm.nd.array(b, ctx), c)
-tvm.testing.assert_allclose(c.asnumpy(), np.dot(a.T, b), rtol=1e-3)
+s[C_buf].tensorize(yo, outer_product)
+#print(tvm.lower(s, [A, B, C], simple_mode=True))
+#testit()
+
+#exit()
+
+def outer_product_impl():
+    cc_code = """
+      extern "C" int outer_product_update(float *cc, float *aa, float *bb, int n, int m) {
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < m; ++j) {
+                cc[i * m + j] += aa[i] * bb[j];
+            }
+        }
+        return 0;
+      }
+      extern "C" int outer_product_reset(float *cc, int n, int m) {
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < m; ++j) {
+                cc[i * m + j] = 0;
+            }
+        }
+        return 0;
+      }
+    """
+    from tvm.contrib import util, clang
+    temp = util.tempdir()
+    return clang.create_llvm(cc_code, output=temp.relpath("temp.ll"))
+
+s[C_buf].pragma(z, "import_llvm", outer_product_impl())
+print(tvm.lower(s, [A, B, C], simple_mode=True))
+
+testit()
