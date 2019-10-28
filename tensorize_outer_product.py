@@ -134,8 +134,6 @@ def intrin_output_product(n,m):
     with tvm.build_config(offset_factor=1):
         return tvm.decl_tensor_intrin(c.op, intrin_func, binds={a: Ab, b: Bb, c: Cb})
 
-s[C_buf].tensorize(xi, intrin_output_product( factor, factor))
-
 def outer_product_impl():
     cc_code = """
       extern "C" int outer_product_update(float *cc, float *aa, float *bb, int n, int m, int stride) {
@@ -159,9 +157,8 @@ def outer_product_impl():
     temp = util.tempdir()
     return clang.create_llvm(cc_code, output=temp.relpath("temp.ll"))
 
-impl = outer_product_impl()
-print(impl)
-s[C_buf].pragma( k, "import_llvm", impl)
+s[C_buf].tensorize(xi, intrin_output_product( factor, factor))
+s[C_buf].pragma( z, "import_llvm", outer_product_impl())
 print(tvm.lower(s, [A, B, C], simple_mode=True))
 
 testit()
