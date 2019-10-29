@@ -6,8 +6,8 @@ import numpy.linalg as la
 
 def test_A():
 
-    s = 1
-    t = 1
+    s = 2
+    t = 4
 
     N = 64*s
     M = 64*s
@@ -136,7 +136,7 @@ Ratios: M, bn, bl
                             C[bn*I + i,bm*J + j] = CC[i,j]
                             c_stores += 1
                     
-        print( f"a_loads: {a_loads} b_loads: {b_loads} c_loads: {c_loads} c_stores: {c_stores} a,b,c_storage: {a_storage} {b_storage} {c_storage}")
+        print( f"a_loads: {a_loads} b_loads: {b_loads} c_loads: {c_loads} c_stores: {c_stores} a,b,c_storage: {a_storage},{b_storage},{c_storage}")
         return C
 
 
