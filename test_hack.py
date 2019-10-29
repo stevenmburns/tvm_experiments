@@ -25,11 +25,20 @@ def test_A():
         return np.dot( A, B)
 
     def mm1( A, B):
+        a_loads,b_loads,c_loads,c_stores = 0,0,0,0
+        a_storage,b_storage,c_storage = 1,1,1
+
         C = np.zeros( shape=(N,M))
         for i in range(N):
             for j in range(M):
                 for k in range(L):
                     C[i,j] += A[i,k]*B[k,j]
+                    a_loads += 1
+                    b_loads += 1
+                    c_loads += 1
+                    c_stores += 1
+
+        print( f"a,b,c_loads: {a_loads},{b_loads},{c_loads} c_stores: {c_stores} a,b,c_storage: {a_storage},{b_storage},{c_storage}")
         return C
 
     def mm2( A, B):
@@ -51,7 +60,7 @@ def test_A():
                                 b_loads += 1
                                 c_loads += 1
                                 c_stores += 1
-                                
+
         print( f"a,b,c_loads: {a_loads},{b_loads},{c_loads} c_stores: {c_stores} a,b,c_storage: {a_storage},{b_storage},{c_storage}")
 
         return C
