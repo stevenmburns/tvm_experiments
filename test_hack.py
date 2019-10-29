@@ -15,10 +15,10 @@ class Stats:
         self.c_storage = 0
 
     def compute_storage( self, stor, a):
-        stor = functools.reduce( lambda a,b; a*b, a.shape)
+        stor = functools.reduce( lambda a,b: a*b, a.shape)
 
-    def print():
-        print( f"a,b,c_loads: {s.a_loads},{s.b_loads},{s.c_loads} c_stores: {s.c_stores} a,b,c_storage: {s.a_storage},{s.b_storage},{s.c_storage}")
+    def prnt(self):
+        print( f"a,b,c_loads: {self.a_loads},{self.b_loads},{self.c_loads} c_stores: {self.c_stores} a,b,c_storage: {self.a_storage},{self.b_storage},{self.c_storage}")
 
 def test_A():
 
@@ -54,7 +54,7 @@ def test_A():
                     s.c_loads += 1
                     s.c_stores += 1
 
-        s.print()
+        s.prnt()
 
         return C
 
@@ -78,7 +78,7 @@ def test_A():
                                 s.c_loads += 1
                                 s.c_stores += 1
 
-        s.print()
+        s.prnt()
 
         return C
 
@@ -90,7 +90,7 @@ c_stores: N//bn * L//bl * M//bm * bn * bm = N * L//bl * M
 n
 Ratios: M, bn, bl
 """
-        s.Stats()
+        s = Stats()
 
         C = np.zeros( shape=(N,M))
         for I in range(N//bn):
@@ -123,7 +123,7 @@ Ratios: M, bn, bl
                             C[bn*I + i,bm*J + j] = CC[i,j]
                             s.c_stores += 1
                     
-        s.print()
+        s.prnt()
         return C
 
 
