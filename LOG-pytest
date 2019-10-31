@@ -1,0 +1,12 @@
+============================= test session starts ==============================
+platform linux -- Python 3.6.8, pytest-5.2.2, py-1.8.0, pluggy-0.13.0
+rootdir: /home/smburns/UW/tvm_experiments
+collected 1 item
+
+test_hack.py mm0-mm_share_a
+a,b,c_loads: 4096,8192,16384 c_stores: 16384 a,b,c_storage: 512,16,32 loads: 28672 total_storage: 560
+mm0-mm_share_c
+a,b,c_loads: 262144,8192,4096 c_stores: 4096 a,b,c_storage: 512,16,32 loads: 274432 total_storage: 560
+.
+
+============================== 1 passed in 0.87s ===============================

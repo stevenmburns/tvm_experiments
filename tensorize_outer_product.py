@@ -5,6 +5,7 @@ import numpy as np
 from IPython import embed
 from topi.util import get_const_tuple
 
+
 def testit():
     #
     # Make sure it is the same as np.dot( a.T, b)
@@ -17,6 +18,7 @@ def testit():
     c = tvm.nd.array(np.zeros(get_const_tuple(C.shape), dtype=A.dtype), ctx)
     func(tvm.nd.array(a, ctx), tvm.nd.array(b, ctx), c)
     tvm.testing.assert_allclose(c.asnumpy(), np.dot(a.T, b), rtol=1e-3)
+
 
 N, M, L = 1024, 512, 64
 
@@ -66,18 +68,18 @@ print(tvm.lower(s, [A, B, C], simple_mode=True))
 testit()
 
 factor = 16
-x,y = C_buf.op.axis
+x, y = C_buf.op.axis
 z, = C_buf.op.reduce_axis
 xo, xi = s[C_buf].split(x, factor=factor)
 yo, yi = s[C_buf].split(y, factor=factor)
-s[C_buf].reorder(xo, yo, z, xi, yi)
+s[C_buf].reorder(z, xo, yo, xi, yi)
 
 print(tvm.lower(s, [A, B, C], simple_mode=True))
 testit()
 
 
-s[A_buf].compute_at( s[C_buf], z)
-s[B_buf].compute_at( s[C_buf], z)
+s[A_buf].compute_at(s[C_buf], yo)
+s[B_buf].compute_at(s[C_buf], yo)
 print(tvm.lower(s, [A, B, C], simple_mode=True))
 testit()
 
@@ -92,10 +94,11 @@ s[C_buf].compute_at(s[C], c_yo)
 print(tvm.lower(s, [A, B, C], simple_mode=True))
 testit()
 
-def intrin_output_product(n,m):
+
+def intrin_output_product(n, m):
     a = tvm.placeholder((n,), name='a')
     b = tvm.placeholder((m,), name='b')
-    c = tvm.compute((n,m), lambda i,j: a[i] * b[j], name='c')
+    c = tvm.compute((n, m), lambda i, j: a[i] * b[j], name='c')
     Ab = tvm.decl_buffer(a.shape, a.dtype,
                          name="A",
                          offset_factor=1,
@@ -107,7 +110,8 @@ def intrin_output_product(n,m):
     Cb = tvm.decl_buffer(c.shape, c.dtype,
                          name="C",
                          offset_factor=1,
-                         strides=[tvm.var("s1"),1])
+                         strides=[tvm.var("s1"), 1])
+
     def intrin_func(ins, outs):
 
         aa, bb = ins
@@ -121,18 +125,21 @@ def intrin_output_product(n,m):
                                     bb.access_ptr("r"),
                                     n, m, cc.strides[0]))
             return ib.get()
+
         def _reduce_reset():
             ib = tvm.ir_builder.create()
             ib.emit(tvm.call_extern("int32", "outer_product_reset",
                                     cc.access_ptr("w"),
                                     n, m, cc.strides[0]))
             return ib.get()
+
         def _reduce_update():
             return _body()
         return _body(), _reduce_reset(), _reduce_update()
 
     with tvm.build_config(offset_factor=1):
         return tvm.decl_tensor_intrin(c.op, intrin_func, binds={a: Ab, b: Bb, c: Cb})
+
 
 def outer_product_impl():
     cc_code = """
@@ -157,8 +164,9 @@ def outer_product_impl():
     temp = util.tempdir()
     return clang.create_llvm(cc_code, output=temp.relpath("temp.ll"))
 
-s[C_buf].tensorize(xi, intrin_output_product( factor, factor))
-s[C_buf].pragma( z, "import_llvm", outer_product_impl())
+
+s[C_buf].tensorize(xi, intrin_output_product(factor, factor))
+s[C_buf].pragma(z, "import_llvm", outer_product_impl())
 print(tvm.lower(s, [A, B, C], simple_mode=True))
 
 testit()

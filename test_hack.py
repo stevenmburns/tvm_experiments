@@ -16,26 +16,28 @@ class Stats:
         self.b_storage = 0
         self.c_storage = 0
 
-    def compute_storage(self, stor, a):
-        stor = functools.reduce(lambda a, b: a*b, a.shape)
+    def compute_storage(self, tag, a):
+        setattr( self, tag + '_storage', functools.reduce(lambda a, b: a*b, a.shape))
+
+    @property
+    def loads(self):
+        return self.a_loads + self.b_loads + self.c_loads
+
+    @property
+    def total_storage(self):
+        return self.a_storage + self.b_storage + self.c_storage
 
     def prnt(self):
 
-        print(f"a,b,c_loads: {self.a_loads},{self.b_loads},{self.c_loads} c_stores: {self.c_stores} a,b,c_storage: {self.a_storage},{self.b_storage},{self.c_storage}")
+        print(f"a,b,c_loads: {self.a_loads},{self.b_loads},{self.c_loads} c_stores: {self.c_stores} a,b,c_storage: {self.a_storage},{self.b_storage},{self.c_storage} loads: {self.loads} total_storage: {self.total_storage}")
 
 
 def test_A():
 
-    s = 1
-    t = 4
+    N,M,L = 64,64,64
 
-    N = 64*s
-    M = 64*s
-    L = 64*s
-
-    bn = 8*t
-    bm = 8*t
-    bl = 8*t
+#    bn,bm,bl = 16,16,16
+    bn,bm,bl = 32,1,16
 
     assert N % bn == 0
     assert M % bm == 0
@@ -100,20 +102,20 @@ Ratios: M, bn, bl
         for I in range(N//bn):
             for K in range(L//bl):
                 AA = np.zeros(shape=(bn, bl))
-                s.compute_storage(s.a_storage, AA)
+                s.compute_storage('a', AA)
                 for i in range(bn):
                     for k in range(bl):
                         AA[i, k] = A[bn*I+i, bl*K+k]
                         s.a_loads += 1
                 for J in range(M//bm):
                     BB = np.zeros(shape=(bl, bm))
-                    s.compute_storage(s.b_storage, BB)
+                    s.compute_storage('b', BB)
                     for k in range(bl):
                         for j in range(bm):
                             BB[k, j] = B[bl*K+k, bm*J+j]
                             s.b_loads += 1
-                    CC = np.zeros(shape=(bl, bm))
-                    s.compute_storage(s.c_storage, CC)
+                    CC = np.zeros(shape=(bn, bm))
+                    s.compute_storage('c', CC)
                     for i in range(bn):
                         for j in range(bm):
                             CC[i, j] = C[bn*I + i, bm*J + j]
@@ -130,7 +132,7 @@ Ratios: M, bn, bl
         s.prnt()
         return C
 
-    def mm4(A, B):
+    def mm_share_a(A, B):
         """
 a_loads: N//bn * L//bl * bn * bl = N * L
 b_loads: N//bn * L//bl * M//bm * bl * bm = N//bn * L * M
@@ -142,18 +144,18 @@ Ratios: M, bn, bl
         C = np.zeros(shape=(N, M))
         for K, I in product(range(L//bl), range(N//bn)):
             AA = np.zeros(shape=(bn, bl))
-            s.compute_storage(s.a_storage, AA)
+            s.compute_storage('a', AA)
             for i, k in product(range(bn), range(bl)):
                 AA[i, k] = A[bn*I+i, bl*K+k]
                 s.a_loads += 1
             for J in range(M//bm):
                 BB = np.zeros(shape=(bl, bm))
-                s.compute_storage(s.b_storage, BB)
+                s.compute_storage('b', BB)
                 for k, j in product(range(bl), range(bm)):
                     BB[k, j] = B[bl*K+k, bm*J+j]
                     s.b_loads += 1
-                CC = np.zeros(shape=(bl, bm))
-                s.compute_storage(s.c_storage, CC)
+                CC = np.zeros(shape=(bn, bm))
+                s.compute_storage('c', CC)
                 for i, j in product(range(bn), range(bm)):
                     CC[i, j] = C[bn*I + i, bm*J + j]
                     s.c_loads += 1
@@ -166,14 +168,55 @@ Ratios: M, bn, bl
         s.prnt()
         return C
 
+    def mm_share_c(A, B):
+        """
+a_loads: N * M//bm * L
+b_loads: N//bn * M * L
+c_loads: N * M
+c_stores: N * M
+Ratios: M, bn, bl
+"""
+        s = Stats()
+
+        C = np.zeros(shape=(N, M))
+
+        for I in range(N//bn):
+            for J in range(M//bm):
+              CC = np.zeros(shape=(bn, bm))
+              s.compute_storage('c', CC)
+              for i, j in product(range(bn), range(bm)):
+                  CC[i, j] = C[bn*I + i, bm*J + j]
+                  s.c_loads += 1
+              for K in range(L//bl):
+                  AA = np.zeros(shape=(bn, bl))
+                  s.compute_storage('a', AA)
+                  for i, k in product(range(bn), range(bl)):
+                      AA[i, k] = A[bn*I+i, bl*K+k]
+                      s.a_loads += 1
+                  BB = np.zeros(shape=(bl, bm))
+                  s.compute_storage('b', BB)
+                  for k, j in product(range(bl), range(bm)):
+                      BB[k, j] = B[bl*K+k, bm*J+j]
+                      s.b_loads += 1
+                  for k, i, j in product(range(bl), range(bn), range(bm)):
+                      CC[i, j] += AA[i, k]*BB[k, j]
+              for i, j in product(range(bn), range(bm)):
+                  C[bn*I + i, bm*J + j] = CC[i, j]
+                  s.c_stores += 1
+
+        s.prnt()
+        return C
+
     A = np.random.uniform(size=(N, L))
     B = np.random.uniform(size=(L, M))
 
-    print('mm0-mm1')
-    assert la.norm(mm0(A, B)-mm1(A, B)) < 1e-5
-    print('mm0-mm2')
-    assert la.norm(mm0(A, B)-mm2(A, B)) < 1e-5
-    print('mm0-mm3')
-    assert la.norm(mm0(A, B)-mm3(A, B)) < 1e-5
-    print('mm0-mm4')
-    assert la.norm(mm0(A, B)-mm4(A, B)) < 1e-5
+#    print('mm0-mm1')
+#    assert la.norm(mm0(A, B)-mm1(A, B)) < 1e-5
+#    print('mm0-mm2')
+#    assert la.norm(mm0(A, B)-mm2(A, B)) < 1e-5
+#    print('mm0-mm3')
+#    assert la.norm(mm0(A, B)-mm3(A, B)) < 1e-5
+    print('mm0-mm_share_a')
+    assert la.norm(mm0(A, B)-mm_share_a(A, B)) < 1e-5
+    print('mm0-mm_share_c')
+    assert la.norm(mm0(A, B)-mm_share_c(A, B)) < 1e-5
